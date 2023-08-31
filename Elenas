@@ -1,0 +1,58 @@
+@using MyLibrary.ADClasses
+@{
+    var usrData = new UserInfo();
+}
+
+@model List<MyLibrary.Models.Barrow>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Borrowed Books</title>
+</head>
+<body>
+    <h2>My Borrowed Books</h2>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>UserName</th>
+                <th>BookName</th>
+                <th>ISBN</th>
+                <th>BorrowDate</th>
+                <th>ReturnDate</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var book in Model)
+            {
+                <tr>
+                    <td>@book.BorrowedBookId</td>
+                    <td>@book.UserId</td>
+                    <td>@book.BookName</td>
+                    <td>@book.BookISBN</td>
+                    <td>@book.BorrowDateFormated</td>
+                    <td>
+                        @if (book.ReturnDate.HasValue)
+                        {
+                            @book.ReturnDateFormatted
+                        }
+                        else
+                        {
+                            <text>Not returned yet</text>
+                        }
+                    </td>
+                    <td>
+                        @if (!book.ReturnDate.HasValue && !book.IsValidated)
+                        {
+                            <a href="@Url.Action("ReturnBook", "BorrowBook", new { borrowedBookId = book.BorrowedBookId })" class="btn btn-primary">Return</a>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</body>
+</html>
+￼Enter
