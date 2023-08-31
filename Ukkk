@@ -1,0 +1,108 @@
+using System;
+using System.Linq;
+using System.Web.Mvc;
+using MyLibrary.Models;
+using System.Data.Entity;
+using System.Net;
+using MyLibrary.ADClasses;
+
+namespace MyLibrary.Controllers
+{
+    public class BorrowBookController : Controller
+    {
+        private I_CoposEntities db = new I_CoposEntities();
+        UserInfo user = new UserInfo();
+
+        // Restul metodelor rămân neschimbate
+
+        public ActionResult MyBorrowedBooks()
+        {
+            if (user.isLoggedIn())
+            {
+                var borrowedBooks = db.Barrows.ToList();
+                foreach (var book in borrowedBooks)
+                {
+                    book.BorrowDateFormated = book.BorrowDate?.ToString("yyyy-MM-dd HH:mm:ss") ?? "Not returned yet";
+                    book.ReturnDateFormatted = book.ReturnDate?.ToString("yyyy-MM-dd HH:mm:ss") ?? "Not returned yet";
+                }
+                return View(borrowedBooks);
+            }
+            else
+            {
+                return RedirectToAction("LoginPage", "Account");
+            }
+        }
+
+        [HttpGet]
+        public ActionResult Borrow()
+        {
+            ViewBag.ErrorMessage = TempData["ErrorMessage"];
+            ViewBag.SuccessMessage = TempData["SuccessMessage"];
+            return View();
+        }
+
+        [HttpPost]
+        public ActionResult Borrow(string isbn13)
+        {
+            if (string.IsNullOrEmpty(isbn13) || isbn13.Length != 13)
+            {
+                TempData["ErrorMessage"] = "ISBN-13 trebuie să aibă 13 cifre.";
+                return RedirectToAction("Borrow");
+            }
+
+            var book = db.Libraries.FirstOrDefault(b => b.Isbn13 == isbn13);
+            if (book == null)
+            {
+                TempData["ErrorMessage"] = "Cartea cu acest ISBN-13 nu există în bibliotecă.";
+                return RedirectToAction("Borrow");
+            }
+
+            if (user.isLoggedIn())
+            {
+                string currentUserId = getUserName();
+
+                if (book.QtyAvailable > 0)
+                {
+                    book.QtyAvailable--;
+
+                    Barrow borrowedBook = new Barrow
+                    {
+                        UserId = currentUserId,
+                        BookName = book.BookName,
+                        BookISBN = book.Isbn13,
+                        BorrowDate = DateTime.Now,
+                        ReturnDate = DateTime.Now.AddDays(14)
+                    };
+
+                    db.Barrows.Add(borrowedBook);
+                    db.SaveChanges();
+
+                    TempData["SuccessMessage"] = "Cartea a fost împrumutată cu succes!";
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "Cartea nu este disponibilă pentru împrumut.";
+                }
+
+                return RedirectToAction("Borrow");
+            }
+            else
+            {
+                return RedirectToAction("LoginPage", "Account");
+            }
+        }
+
+        public string getUserName()
+        {
+            return user.getUsername();
+        }
+    }
+}
+
+
+
+
+
+
+
+￼Enter
