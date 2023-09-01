@@ -1,0 +1,22 @@
+@foreach (var book in Model)
+{
+    <div class="book-details">
+        <!-- ... alte detalii ale cărții ... -->
+
+        @if (book.QtyAvailable > 0)
+        {
+            @using (Html.BeginForm("Borrow", "BorrowBook"))
+            {
+                @Html.Hidden("isbn13", book.Isbn13)
+                <button type="submit" class="btn btn-primary">Borrow</button>
+            }
+        }
+        else
+        {
+            @Html.ActionLink("Waitlist", "Join", "WaitList", new { isbn13 = book.Isbn13 }, new { @class = "btn btn-secondary" })
+        }
+
+        @Html.ActionLink("Details", "Details", "BooksAvailable", new { id = book.Id }, new { @class = "btn btn-info" })
+    </div>
+}
+￼Enter
