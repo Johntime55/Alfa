@@ -1,0 +1,84 @@
+using MyLibrary.Models;
+using System;
+using System.Collections.Generic;
+using System.Data.Entity;
+using System.Linq;
+using System.Net;
+using System.Web;
+using System.Web.Mvc;
+
+namespace MyLibrary.Controllers
+{
+    public class BooksAvailableController : Controller
+    {
+        private I_CoposEntities db = new I_CoposEntities();
+
+        // GET: BooksAvailable
+        public ActionResult Index()
+        {
+            return View(db.BooksAvailables.OrderBy(p => p.Author).Distinct().ToList());
+        }
+
+        // GET: BooksAvailable/Details/5
+        public ActionResult Details(int? id)
+        {
+            if (id == null)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+            BooksAvailable booksavailable = db.BooksAvailables.Find(id);
+            if (booksavailable == null)
+            {
+                return HttpNotFound();
+            }
+            return View(booksavailable);
+        }
+
+        public ActionResult BorrowAction(int? id)
+        {
+            if (id == null)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+
+            var book = db.BooksAvailables.Find(id);
+            if (book == null || book.QtyAvailable <= 0)
+            {
+                return HttpNotFound();
+            }
+
+            // Implementează logica pentru împrumutul cărții și actualizarea cantității disponibile.
+
+            return RedirectToAction("Index");
+        }
+
+        public ActionResult WaitlistAction(int? id)
+        {
+            if (id == null)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+
+            var book = db.BooksAvailables.Find(id);
+            if (book == null || book.QtyAvailable > 0)
+            {
+                return HttpNotFound();
+            }
+
+            // Implementează logica pentru adăugarea cărții în lista de așteptare și notificarea utilizatorului.
+
+            return RedirectToAction("Index");
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                db.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+    }
+}
+
+￼Enter
