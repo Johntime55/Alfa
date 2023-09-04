@@ -1,0 +1,85 @@
+@model List<MyLibrary.Models.Barrow>
+
+@{
+    ViewBag.Title = "My Borrowed Books";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>My Borrowed Books</h2>
+
+@if (!string.IsNullOrEmpty(ViewBag.ErrorMessage))
+{
+    <div class="alert alert-danger">
+        @ViewBag.ErrorMessage
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(ViewBag.SuccessMessage))
+{
+    <div class="alert alert-success">
+        @ViewBag.SuccessMessage
+    </div>
+}
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>UserName</th>
+            <th>BookName</th>
+            <th>ISBN</th>
+            <th>BorrowDate</th>
+            <th>ReturnDate</th>
+            <th>Status</th> <!-- Adăugați o coloană pentru Status -->
+            <th>Actions</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var book in Model)
+        {
+            <tr>
+                <td>@book.BorrowedBookId</td>
+                <td>@book.UserId</td>
+                <td>@book.BookName</td>
+                <td>@book.BookISBN</td>
+                <td>@book.BorrowDateFormated</td>
+                <td>
+                    @if (book.ReturnDate.HasValue)
+                    {
+                        @book.ReturnDateFormatted
+                    }
+                    else
+                    {
+                        <text>Not returned yet</text>
+                    }
+                </td>
+                <td>
+                    @if (book.Status == "Împrumutat")
+                    {
+                        <span class="text-success">@book.Status</span>
+                    }
+                    else if (book.Status == "Returnat")
+                    {
+                        <span class="text-secondary">@book.Status</span>
+                    }
+                    else
+                    {
+                        <span class="text-warning">@book.Status</span>
+                    }
+                </td>
+                <td>
+                    @if (book.Status == "Împrumutat")
+                    {
+                        <a href="@Url.Action("ReturnBook", "BorrowBook", new { BorrowedBookId = book.BorrowedBookId })" class="btn btn-primary">Return book</a>
+                    }
+                    else
+                    {
+                        <span class="text-secondary">Returned</span>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+￼Enter
