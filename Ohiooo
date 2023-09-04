@@ -1,0 +1,36 @@
+// Aceasta este acțiunea pentru returnarea unei cărți
+public ActionResult ReturnBook(int BorrowedBookId)
+{
+    var borrowedBook = db.Barrows.Find(BorrowedBookId);
+
+    // Verificați statusul cărții înainte de a o returna
+    if (borrowedBook != null && borrowedBook.Status == "Împrumutat")
+    {
+        borrowedBook.Status = "Returnat"; // Actualizați statusul cărții la "Returnat"
+        db.SaveChanges();
+
+        // Actualizați și cantitatea în BooksAvailables aici
+        var bookAvailable = db.BooksAvailables.FirstOrDefault(b => b.Isbn13 == borrowedBook.BookISBN);
+        if (bookAvailable != null)
+        {
+            bookAvailable.QtyAvailable++; // Incrementați cantitatea disponibilă
+            db.SaveChanges();
+        }
+
+        // Mesaj de succes
+        TempData["SuccessMessage"] = "Cartea a fost returnată cu succes!";
+    }
+    else if (borrowedBook != null && borrowedBook.Status == "Returnat")
+    {
+        // Cărțile deja returnate nu pot fi returnate din nou
+        TempData["ErrorMessage"] = "Această carte a fost deja returnată.";
+    }
+    else
+    {
+        // Cărțile în așteptare sau altele pot avea alt status și nu pot fi returnate
+        TempData["ErrorMessage"] = "Nu puteți returna această carte.";
+    }
+
+    return RedirectToAction("MyBorrowedBooks");
+}
+￼Enter
