@@ -1,0 +1,60 @@
+model MyLibrary.Models.Barrow
+
+@{
+    ViewBag.Title = "Return Book";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Return Book</h2>
+
+@using (Html.BeginForm("ProcessReturn", "BorrowBook", new { borrowedBookId = Model.BorrowedBookId }, FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+    <div class="form-group">
+        <label>Book Name:</label>
+        @Html.DisplayFor(model => model.BookName)
+    </div>
+    <div class="form-group">
+        <label>Borrow Date:</label>
+        @Html.DisplayFor(model => model.BorrowDate)
+    </div>
+    <div class="form-group">
+        <label>Return Date:</label>
+        @Html.DisplayFor(model => model.ReturnDate)
+    </div>
+    <button type="submit" class="btn btn-primary">Confirm Return</button>
+}
+
+
+// Aceasta este acțiunea pentru afișarea formularului de returnare
+[HttpGet]
+public ActionResult Return(int borrowedBookId)
+{
+    var borrowedBook = db.Barrows.Find(borrowedBookId);
+    if (borrowedBook == null)
+    {
+        // Handle error if the borrowed book is not found
+        return RedirectToAction("MyBorrowedBooks");
+    }
+
+    return View(borrowedBook);
+}
+
+// Aceasta este acțiunea pentru procesarea returnării cărții
+[HttpPost]
+public ActionResult ProcessReturn(int borrowedBookId)
+{
+    var borrowedBook = db.Barrows.Find(borrowedBookId);
+    if (borrowedBook == null)
+    {
+        // Handle error if the borrowed book is not found
+        return RedirectToAction("MyBorrowedBooks");
+    }
+
+    // Mark the book as returned
+    borrowedBook.ReturnDate = DateTime.Now;
+    db.SaveChanges();
+
+    return RedirectToAction("MyBorrowedBooks");
+}
+￼Enter
